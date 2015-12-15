@@ -292,7 +292,9 @@ namespace NDO.SqlCeProvider
                 SqlCeDataAdapter da = handler.DataAdapter as SqlCeDataAdapter;
                 if (da == null)
                     throw new NDOException(29, "Can't register SqlCe update handler for data adapter of type " + handler.DataAdapter.GetType().FullName + ".");
-                updateHandlers.Add(da, handler);
+				if (handler == null)
+					throw new ArgumentNullException( "handler", "RegisterRowUpdateHandler" );
+				updateHandlers.Add( da, handler );
                 da.RowUpdated += new SqlCeRowUpdatedEventHandler(this.OnRowUpdated);
             }
         }
@@ -336,7 +338,7 @@ namespace NDO.SqlCeProvider
 		public override string[] GetTableNames(IDbConnection conn, string owner)
 		{
             IList result = new ArrayList();
-            string sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'";
+            string sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES";
             SqlCeCommand cmd = new SqlCeCommand(sql, (SqlCeConnection)conn);
             bool wasOpen = true;
             if (conn.State == ConnectionState.Closed)
