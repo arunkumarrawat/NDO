@@ -2927,17 +2927,17 @@ namespace NDO
 
 
 		/// <summary>
-		/// Reset object to its transient state and remove it from the cache. Optinally, invalidate object id to
-		/// suppress future access.
+		/// Reset object to its transient state and remove it from the cache. Optinally, remove the object id to
+		/// disable future access.
 		/// </summary>
 		/// <param name="pc"></param>
-		/// <param name="invalidateId">true if object id should be invalidated</param>
-		private void MakeObjectTransient(IPersistenceCapable pc, bool invalidateId) 
+		/// <param name="removeId">Indicates if the object id should be nulled</param>
+		private void MakeObjectTransient(IPersistenceCapable pc, bool removeId) 
 		{
 			cache.Deregister(pc);
-			if(invalidateId) 
+			// MakeTransient doesn't remove the ID, because delete makes objects transient and we need the id for the ChangeLog			
+			if(removeId) 
 			{
-				pc.NDOObjectId.Invalidate();
 				pc.NDOObjectId = null;
 			}
 			pc.NDOObjectState = NDOObjectState.Transient;
@@ -2964,7 +2964,7 @@ namespace NDO
 			{
 				LoadData(pc);
 			}
-			MakeObjectTransient(pc, false);
+			MakeObjectTransient(pc, true);
 		}
 
 
