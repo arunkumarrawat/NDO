@@ -50,7 +50,7 @@ namespace NDO
 		NDO.Mapping.Class resultClass;
 		IList names;
 		Mappings mappings;
-		IList tokens;
+		List<Token> tokens;
 		Hashtable queryContext;
 		TypeManager typeManager;
 
@@ -67,7 +67,9 @@ namespace NDO
 			this.resultClass = resultClass;
 			this.names = names;
 			this.mappings = mappings;
-			this.tokens = tokens;
+			this.tokens = new List<Token>();
+			foreach (Token t in tokens)
+				this.tokens.Add( t );
 			this.queryContext = queryContext;
 			this.typeManager = typeManager;
 		}
@@ -324,16 +326,13 @@ namespace NDO
 							//As long as the WherePartGenerator is used for Prefetches,
 							//we don't throw an exception at this point
 							//throw new NDOException(35, "Class '" + resultClass.FullName + "': 'oid' is not a valid condition field for intermediate classes, because the oid is not mapped to a single column.");
-                        else if (!columnNames.Contains(name))
-                        {
-                            if (resultClass.Oid.OidColumns.Count < index + 1)
-                                throw new NDOException(114, "Wrong oid index in query: '" + name + "'. Size of Oid column array of type " + resultClass.FullName + " is " + resultClass.Oid.OidColumns.Count + '.');
-							if ( match.Success )
-							{
-								OidColumn oidColumn = (OidColumn) resultClass.Oid.OidColumns[index];
-								columnNames.Add( name, QualifiedTableName.Get( resultClass.TableName, provider ) + "." + provider.GetQuotedName( oidColumn.Name ) );
-							}
-                        }
+						else if (!columnNames.Contains( name ))
+						{
+							if (resultClass.Oid.OidColumns.Count < index + 1)
+								throw new NDOException( 114, "Wrong oid index in query: '" + name + "'. Size of Oid column array of type " + resultClass.FullName + " is " + resultClass.Oid.OidColumns.Count + '.' );
+							OidColumn oidColumn = (OidColumn) resultClass.Oid.OidColumns[index];
+							columnNames.Add( name, QualifiedTableName.Get( resultClass.TableName, provider ) + "." + provider.GetQuotedName( oidColumn.Name ) );
+						}
 						
 					}
 					else
@@ -345,8 +344,8 @@ namespace NDO
 						else
 						{
 							Relation r = resultClass.FindRelation( name );
-							if (r.Multiplicity == RelationMultiplicity.Element && r.ForeignKeyColumns.Count() == 1)
-								column = r.ForeignKeyColumns.First();
+							if (r.Multiplicity == RelationMultiplicity.Element && r.ForeignKeyColumns.Count == 1)
+								column = (Column) r.ForeignKeyColumns[0];
 						}
 						if (column == null)
 							throw new NDOException(7, "Can't find mapping information for field " + resultClass.FullName + "." + name);
@@ -361,9 +360,11 @@ namespace NDO
 			string newfilter = "";
 			string lastUsedName = null;
 			Token lastOperator = null;
+			bool isVeryFirstOidColumn = true;
 
-			foreach (Token t in tokens)
+			for (int tokenIndex = 0; tokenIndex < tokens.Count; tokenIndex++)
 			{
+				Token t = tokens[tokenIndex];
 				if (t.TokenType == Token.Type.Name)
 				{
 					if ( string.Compare( lastUsedName, "oid", true ) == 0 )
@@ -375,10 +376,17 @@ namespace NDO
 				}
 				else if ( t.IsOperator )
 				{
-					if ( string.Compare( lastUsedName, "oid", true ) == 0 )
+					if (string.Compare( lastUsedName, "oid", true ) == 0)
+					{
 						lastOperator = t;
+						if (tokens[tokenIndex + 1].TokenType != Token.Type.Parameter)
+							newfilter += t.Value;
+					}
 					else
+					{
 						newfilter += t.Value;
+					}
+					
 				}
 				else if ( t.TokenType == Token.Type.Parameter )
 				{
@@ -397,8 +405,12 @@ namespace NDO
 						foreach ( OidColumn oidColumn in resultClass.Oid.OidColumns )
 						{
 							string col = QualifiedTableName.Get( resultClass.TableName, provider ) + "." + provider.GetQuotedName( oidColumn.Name );
-							newfilter += col;
-							newfilter += " ";
+							if (!isVeryFirstOidColumn)
+							{
+								newfilter += col;
+								newfilter += " ";
+								isVeryFirstOidColumn = false;
+							}
 							newfilter += lastOperator.Value;
 							newfilter += " ";
 							newfilter += "{oid:" + parIndex + ":" + i + "}";
