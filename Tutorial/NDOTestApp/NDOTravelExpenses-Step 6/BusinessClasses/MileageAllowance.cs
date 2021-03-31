@@ -27,7 +27,7 @@ using System.ComponentModel;
 namespace BusinessClasses
 {
     [NDOPersistent, DisplayName("Milage Allowance")]
-    public partial class MileageAllowance : Expense
+    public class MileageAllowance : Expense
     {
         int milesDriven;
         public int MilesDriven

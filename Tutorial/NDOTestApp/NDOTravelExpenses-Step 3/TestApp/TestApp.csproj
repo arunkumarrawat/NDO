@@ -12,6 +12,8 @@
     <AssemblyName>TestApp</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -56,9 +58,6 @@
     <CodeAnalysisFailOnMissingRules>true</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NDO, Version=3.0.0.0, Culture=neutral, PublicKeyToken=37bfdffa92a0cd24, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -76,6 +75,7 @@
   <ItemGroup>
     <None Include="bin\Debug\TestApp.ndo.sql" />
     <None Include="bin\Debug\TestApp.ndodiff.1.0.sql" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="NDOMapping.xml" />
@@ -112,4 +112,11 @@
     <NDOInstallPath Condition=" '$(NDOInstallPath)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\NDO@InstallDir)</NDOInstallPath>
   </PropertyGroup>
   <Import Project="$(NDOInstallPath)\NDOEnhancer.Targets" />
+  <Import Project="..\packages\NDO.dll.4.0.4.1\build\NDO.dll.targets" Condition="Exists('..\packages\NDO.dll.4.0.4.1\build\NDO.dll.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Dieses Projekt verweist auf mindestens ein NuGet-Paket, das auf diesem Computer fehlt. Verwenden Sie die Wiederherstellung von NuGet-Paketen, um die fehlenden Dateien herunterzuladen. Weitere Informationen finden Sie unter "http://go.microsoft.com/fwlink/?LinkID=322105". Die fehlende Datei ist "{0}".</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\NDO.dll.4.0.4.1\build\NDO.dll.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NDO.dll.4.0.4.1\build\NDO.dll.targets'))" />
+  </Target>
 </Project>

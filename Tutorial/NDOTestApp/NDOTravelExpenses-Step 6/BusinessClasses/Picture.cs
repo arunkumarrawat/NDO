@@ -29,7 +29,7 @@ using NDO;
 namespace BusinessClasses
 {
     [NDOPersistent]
-    public partial class Picture : PictureHeader
+    public class Picture : PictureHeader
     {
         byte[] rawbytes = null;
         [NDOTransient]

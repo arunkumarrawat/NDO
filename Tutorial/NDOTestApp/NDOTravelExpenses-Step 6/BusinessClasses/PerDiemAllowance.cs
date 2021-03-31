@@ -27,7 +27,7 @@ using System.ComponentModel;
 namespace BusinessClasses
 {
     [NDOPersistent, DisplayName("Per Diem Allowance")]
-    public partial class PerDiemAllowance : Expense
+    public class PerDiemAllowance : Expense
     {
         decimal hours;
         public decimal Hours

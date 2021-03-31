@@ -27,7 +27,7 @@ using System.ComponentModel;
 namespace BusinessClasses
 {
     [NDOPersistent, DisplayName("Expense Voucher")]
-    public partial class ExpenseVoucher : Expense
+    public class ExpenseVoucher : Expense
     {
         string text;
         public string VoucherText
